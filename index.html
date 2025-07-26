@@ -49,6 +49,25 @@
       font-weight: bold;
       cursor: pointer;
     }
+    label.checkbox {
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    label.checkbox input {
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
+    .tos-label {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .tos-label a {
+      color: #1976d2;
+      text-decoration: none;
+      font-weight: 600;
+    }
     #chat, #chatArea, #dockSelect, #messageInput, #sendBtn, #logoutBtn {
       display: none;
     }
@@ -74,7 +93,15 @@
     <h2>Welcome to AurstChat</h2>
     <input type="text" id="username" placeholder="Username" />
     <input type="password" id="password" placeholder="Password" />
-    <label><input type="checkbox" id="rememberMe"> Remember me</label>
+    
+    <label class="checkbox"><input type="checkbox" id="rememberMe"> Remember me</label>
+    
+    <label class="checkbox">
+      <input type="checkbox" id="tos">
+      I've agreed to the 
+      <a href="aurstchat_tos.txt" download>Terms of Service</a> and read it no matter what.
+    </label>
+
     <button onclick="login()">Login</button>
   </div>
 
@@ -132,10 +159,15 @@
   function login() {
     const u = document.getElementById("username").value;
     const p = document.getElementById("password").value;
+    const agreed = document.getElementById("tos").checked;
+
     if (!u || !p) return alert("Fill both fields");
+    if (!agreed) return alert("You must agree to the Terms of Service");
+
     currentUser = u;
     if (document.getElementById("rememberMe").checked)
       localStorage.setItem("aurst_user", `${u}:${p}`);
+
     document.getElementById("loginCard").style.display = "none";
     document.getElementById("chat").style.display = "block";
     document.getElementById("dockSelect").style.display = "block";
@@ -181,7 +213,7 @@
       chatArea.appendChild(div);
       chatArea.scrollTop = chatArea.scrollHeight;
 
-      if (msg.user !== currentUser) {
+      if (msg.user !== currentUser && Notification.permission === "granted") {
         new Notification("New Message", {
           body: msg.user + ": " + msg.text
         });
