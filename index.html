@@ -1,235 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AurstChat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Nunito', sans-serif;
-      background: linear-gradient(to bottom, #e3f2fd, #ffffff);
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4ff;
       color: #333;
     }
-    .container {
-      max-width: 420px;
-      margin: auto;
+
+    .login, .chat {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       padding: 20px;
     }
-    .card {
+
+    .login.active, .chat.active {
+      display: flex;
+    }
+
+    .login-box {
       background: white;
+      padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 20px;
-      margin-top: 40px;
-    }
-    h2 {
-      text-align: center;
-      color: #1976d2;
-    }
-    input, select {
+      box-shadow: 0 0 25px rgba(0,0,0,0.05);
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 8px;
+      max-width: 400px;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
       border: 1px solid #ccc;
-      font-size: 16px;
+      border-radius: 6px;
     }
-    button {
-      background: #1976d2;
-      color: white;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    label.checkbox {
+
+    .checkbox-row {
       display: flex;
       align-items: center;
-      margin-top: 8px;
-      font-size: 14px;
+      margin: 10px 0;
     }
-    label.checkbox input {
+
+    .checkbox-row input[type="checkbox"] {
       margin-right: 8px;
-      transform: scale(1.2);
     }
-    .tos-label {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    .tos-label a {
-      color: #1976d2;
+
+    .checkbox-row a {
+      color: #007bff;
       text-decoration: none;
-      font-weight: 600;
     }
-    #chat, #chatArea, #dockSelect, #messageInput, #sendBtn, #logoutBtn {
-      display: none;
-    }
-    .message {
+
+    button {
+      background: #007bff;
+      color: white;
       padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #chat-messages {
+      flex: 1;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 15px;
+      overflow-y: auto;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .message {
       margin: 5px 0;
-      border-radius: 8px;
     }
-    .you {
-      background: #bbdefb;
-      text-align: right;
+
+    #chat-input {
+      display: flex;
+      width: 100%;
+      max-width: 600px;
     }
-    .them {
-      background: #e1f5fe;
+
+    #chat-input input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px 0 0 6px;
+      border: 1px solid #ccc;
+    }
+
+    #chat-input button {
+      border-radius: 0 6px 6px 0;
     }
   </style>
 </head>
 <body>
-
-<div class="container">
   <!-- Login Page -->
-  <div class="card" id="loginCard">
-    <h2>Welcome to AurstChat</h2>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
-    
-    <label class="checkbox"><input type="checkbox" id="rememberMe"> Remember me</label>
-    
-    <label class="checkbox">
-      <input type="checkbox" id="tos">
-      I've agreed to the 
-      <a href="aurstchat_tos.txt" download>Terms of Service</a> and read it no matter what.
-    </label>
+  <div class="login active" id="loginPage">
+    <div class="login-box">
+      <h2>AurstChat Login</h2>
+      <input type="text" id="username" placeholder="Username" />
+      <input type="password" id="password" placeholder="Password" />
 
-    <button onclick="login()">Login</button>
+      <div class="checkbox-row">
+        <input type="checkbox" id="rememberMe" />
+        <label for="rememberMe">Remember Me</label>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="agreeTOS" />
+        <label for="agreeTOS">I’ve agreed to the <a href="#" onclick="downloadTOS()">Terms of Service</a></label>
+      </div>
+
+      <button onclick="login()">Login</button>
+    </div>
   </div>
 
   <!-- Chat Page -->
-  <div class="card" id="chat">
-    <h2 id="welcome"></h2>
-    <select id="dockSelect" onchange="switchDock(this.value)">
-      <option>Hangouts (Text)</option>
-      <option>Hangouts (Voice)</option>
-    </select>
-    <input type="text" id="newDockName" placeholder="New dock name">
-    <select id="dockType">
-      <option value="text">Text</option>
-      <option value="voice">Voice</option>
-    </select>
-    <button onclick="createDock()">+ Create Dock</button>
-
-    <div id="chatArea" style="height: 300px; overflow-y: auto; margin-top: 10px; border: 1px solid #ddd; padding: 10px; border-radius: 8px;"></div>
-    <input type="text" id="messageInput" placeholder="Type a message..." />
-    <button id="sendBtn" onclick="sendMessage()">Send</button>
-    <button id="logoutBtn" onclick="logout()">Logout</button>
+  <div class="chat" id="chatPage">
+    <div id="chat-messages"></div>
+    <div id="chat-input">
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="confirmDelete()">🗑️</button>
+    </div>
   </div>
-</div>
 
-<script>
-  // Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyBVkHxmqq4pyQm3_4ZvxLkVJmZZYj4og5g",
-    authDomain: "aurstchat.firebaseapp.com",
-    databaseURL: "https://aurstchat-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "aurstchat",
-    storageBucket: "aurstchat.appspot.com",
-    messagingSenderId: "749704727616",
-    appId: "1:749704727616:web:ab31f980b5b195dbbf23a5",
-    measurementId: "G-Y35FL4S5FV"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+  <script>
+    const loginPage = document.getElementById('loginPage');
+    const chatPage = document.getElementById('chatPage');
+    const rememberMe = document.getElementById('rememberMe');
+    const agreeTOS = document.getElementById('agreeTOS');
 
-  let currentUser = '';
-  let currentDock = 'Hangouts (Text)';
-
-  // Check saved login
-  window.onload = () => {
-    Notification.requestPermission();
-    const saved = localStorage.getItem("aurst_user");
-    if (saved) {
-      const [user, pass] = saved.split(":");
-      document.getElementById("username").value = user;
-      document.getElementById("password").value = pass;
-      login();
-    }
-  }
-
-  function login() {
-    const u = document.getElementById("username").value;
-    const p = document.getElementById("password").value;
-    const agreed = document.getElementById("tos").checked;
-
-    if (!u || !p) return alert("Fill both fields");
-    if (!agreed) return alert("You must agree to the Terms of Service");
-
-    currentUser = u;
-    if (document.getElementById("rememberMe").checked)
-      localStorage.setItem("aurst_user", `${u}:${p}`);
-
-    document.getElementById("loginCard").style.display = "none";
-    document.getElementById("chat").style.display = "block";
-    document.getElementById("dockSelect").style.display = "block";
-    document.getElementById("chatArea").style.display = "block";
-    document.getElementById("messageInput").style.display = "block";
-    document.getElementById("sendBtn").style.display = "inline-block";
-    document.getElementById("logoutBtn").style.display = "inline-block";
-    document.getElementById("welcome").innerText = `Hi ${u}!`;
-    loadMessages(currentDock);
-  }
-
-  function logout() {
-    localStorage.removeItem("aurst_user");
-    location.reload();
-  }
-
-  function createDock() {
-    const name = document.getElementById("newDockName").value;
-    const type = document.getElementById("dockType").value;
-    if (!name) return;
-    const dock = `${name} (${type === 'voice' ? 'Voice' : 'Text'})`;
-    const opt = document.createElement("option");
-    opt.text = dock;
-    document.getElementById("dockSelect").add(opt);
-    document.getElementById("dockSelect").value = dock;
-    switchDock(dock);
-  }
-
-  function switchDock(dockName) {
-    currentDock = dockName;
-    loadMessages(dockName);
-  }
-
-  function loadMessages(dockName) {
-    const chatArea = document.getElementById("chatArea");
-    chatArea.innerHTML = '';
-    db.ref("chat/" + dockName).off(); // remove previous listener
-    db.ref("chat/" + dockName).on("child_added", snapshot => {
-      const msg = snapshot.val();
-      const div = document.createElement("div");
-      div.className = "message " + (msg.user === currentUser ? "you" : "them");
-      div.innerText = msg.user + ": " + msg.text;
-      chatArea.appendChild(div);
-      chatArea.scrollTop = chatArea.scrollHeight;
-
-      if (msg.user !== currentUser && Notification.permission === "granted") {
-        new Notification("New Message", {
-          body: msg.user + ": " + msg.text
-        });
+    window.onload = () => {
+      const savedUser = localStorage.getItem('username');
+      const savedPass = localStorage.getItem('password');
+      if (savedUser && savedPass) {
+        document.getElementById('username').value = savedUser;
+        document.getElementById('password').value = savedPass;
+        login();
       }
-    });
-  }
+    };
 
-  function sendMessage() {
-    const msg = document.getElementById("messageInput").value;
-    if (!msg) return;
-    db.ref("chat/" + currentDock).push({
-      user: currentUser,
-      text: msg
-    });
-    document.getElementById("messageInput").value = "";
-  }
-</script>
+    function login() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+
+      if (!agreeTOS.checked) {
+        alert("You must agree to the Terms of Service.");
+        return;
+      }
+
+      if (rememberMe.checked) {
+        localStorage.setItem('username', user);
+        localStorage.setItem('password', pass);
+      } else {
+        localStorage.removeItem('username');
+        localStorage.removeItem('password');
+      }
+
+      loginPage.classList.remove('active');
+      chatPage.classList.add('active');
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const msg = input.value.trim();
+      if (msg !== "") {
+        const div = document.createElement("div");
+        div.className = "message";
+        div.innerText = msg;
+        document.getElementById("chat-messages").appendChild(div);
+        input.value = "";
+
+        // Scroll to bottom
+        document.getElementById("chat-messages").scrollTop = document.getElementById("chat-messages").scrollHeight;
+
+        // Notification
+        if (Notification.permission === "granted") {
+          new Notification("New Message", { body: msg });
+        }
+      }
+    }
+
+    function confirmDelete() {
+      if (confirm("Delete all messages?")) {
+        document.getElementById("chat-messages").innerHTML = "";
+      }
+    }
+
+    function downloadTOS() {
+      const blob = new Blob(["AurstChat Terms of Service\n\nWelcome to AurstChat. By using this service, you agree to..."], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "aurstchat_tos.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Ask for notification permission
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  </script>
 </body>
 </html>
