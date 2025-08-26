@@ -1,7 +1,8 @@
-1. THE DATA IS STORED ON A SERVER / FIREBASE. SO DONT
-STORE YOUR PRIVATE DATA THERE.
+Talk – Terms of Service (First Edition)
 
-2. DO NOT DISTRIBUTE THIS PROJECT UNDER YOUR NAME OR
-YOU WILL GET UP TO $100 CHARGE.
+1. Data Storage
+Talk (HyperAlt Talk) stores information on external servers (e.g., Firebase). Please do not store any sensitive or private data, as we cannot guarantee complete privacy or security.
 
-First Edition of AurstChat ToS.
+
+2. Usage & Distribution
+You may use this project for personal purposes only. Redistribution, resale, or claiming ownership under your own name is prohibited and may result in a penalty fee of up to $100 USD.
